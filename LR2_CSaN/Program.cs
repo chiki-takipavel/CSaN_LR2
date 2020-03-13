@@ -14,6 +14,7 @@ namespace LR2_CSaN
             byte[] message = new byte[1024];
 
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+            Console.Write("traceroute ");
             string name = Console.ReadLine();
             try
             {
