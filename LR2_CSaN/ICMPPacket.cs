@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LR2_CSaN
 {
     class ICMPPacket
     {
+        const int IP_HEADER_SIZE = 20;
+        const int ICMP_HEADER_SIZE = 4;
+
         private byte code;
         private UInt16 checksum;
         private int messageSize;
@@ -19,7 +20,6 @@ namespace LR2_CSaN
         {
             Type = type;
             code = 0;
-            checksum = 0;
             Buffer.BlockCopy(data, 0, message, 4, data.Length);
             messageSize = data.Length + 4;
             PacketSize = messageSize + 4;
@@ -28,12 +28,12 @@ namespace LR2_CSaN
 
         public ICMPPacket(byte[] data, int size)
         {
-            Type = data[20];
-            code = data[21];
-            checksum = BitConverter.ToUInt16(data, 22);
-            PacketSize = size - 20;
-            messageSize = size - 24;
-            Buffer.BlockCopy(data, 24, message, 0, messageSize);
+            Type = data[IP_HEADER_SIZE]; //ICMP_TYPE_OFFSET
+            code = data[IP_HEADER_SIZE + 1]; //ICMP_CODE_OFFSET
+            checksum = BitConverter.ToUInt16(data, IP_HEADER_SIZE + 2);   //ICMP_CHECKSUM_OFFSET
+            PacketSize = size - IP_HEADER_SIZE;
+            messageSize = size - IP_HEADER_SIZE - ICMP_HEADER_SIZE;
+            Buffer.BlockCopy(data, IP_HEADER_SIZE + ICMP_HEADER_SIZE, message, 0, messageSize);
         }
 
         public byte[] getBytes()
@@ -42,24 +42,24 @@ namespace LR2_CSaN
             Buffer.BlockCopy(BitConverter.GetBytes(Type), 0, data, 0, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(code), 0, data, 1, 1);
             Buffer.BlockCopy(BitConverter.GetBytes(checksum), 0, data, 2, 2);
-            Buffer.BlockCopy(message, 0, data, 4, messageSize);
+            Buffer.BlockCopy(message, 0, data, ICMP_HEADER_SIZE, messageSize);
             return data;
         }
 
         public UInt16 getChecksum()
         {
-            UInt32 chcksm = 0;
+            UInt32 checksum = 0;
             byte[] data = getBytes();
             int index = 0;
 
             while (index < PacketSize)
             {
-                chcksm += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
+                checksum += Convert.ToUInt32(BitConverter.ToUInt16(data, index));
                 index += 2;
             }
-            chcksm = (chcksm >> 16) + (chcksm & 0xffff);
-            chcksm += (chcksm >> 16);
-            return (UInt16)(~chcksm);
+            checksum = (checksum >> 16) + (checksum & 0xffff);
+            checksum += (checksum >> 16);
+            return (UInt16)(~checksum);
         }
     }
 }
