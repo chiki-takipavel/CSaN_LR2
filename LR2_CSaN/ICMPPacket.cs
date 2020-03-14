@@ -21,17 +21,17 @@ namespace LR2_CSaN
         {
             Type = type;
             code = 0;
-            Buffer.BlockCopy(data, 0, message, 4, data.Length);
-            messageSize = data.Length + 4;
-            PacketSize = messageSize + 4;
+            Buffer.BlockCopy(data, 0, message, ICMP_HEADER_SIZE, data.Length);
+            messageSize = data.Length + 4;  // Add size of ICMP Identifier and ICMP Sequence Number 
+            PacketSize = messageSize + ICMP_HEADER_SIZE;
             checksum = getChecksum();
         }
 
         public ICMPPacket(byte[] data, int size)
         {
-            Type = data[IP_HEADER_SIZE]; //ICMP_TYPE_OFFSET
-            code = data[IP_HEADER_SIZE + 1]; //ICMP_CODE_OFFSET
-            checksum = BitConverter.ToUInt16(data, IP_HEADER_SIZE + 2);   //ICMP_CHECKSUM_OFFSET
+            Type = data[IP_HEADER_SIZE];    //ICMP_TYPE_OFFSET
+            code = data[IP_HEADER_SIZE + 1];    //ICMP_CODE_OFFSET
+            checksum = BitConverter.ToUInt16(data, IP_HEADER_SIZE + 2);    //ICMP_CHECKSUM_OFFSET
             PacketSize = size - IP_HEADER_SIZE;
             messageSize = size - IP_HEADER_SIZE - ICMP_HEADER_SIZE;
             Buffer.BlockCopy(data, IP_HEADER_SIZE + ICMP_HEADER_SIZE, message, 0, messageSize);
