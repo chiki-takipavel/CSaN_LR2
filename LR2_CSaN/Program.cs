@@ -8,10 +8,11 @@ namespace LR2_CSaN
     class Program
     {
         const int TYPE_ECHO_REQUEST = 8;
+        const int MESSAGE_MAX_SIZE = 1024;
 
         static void Main(string[] args)
         {
-            byte[] message = new byte[1024];
+            byte[] message = new byte[MESSAGE_MAX_SIZE];
 
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
             Console.Write("traceroute ");
@@ -36,7 +37,7 @@ namespace LR2_CSaN
         static void Traceroute(Socket socket, ICMPPacket packet, IPEndPoint destIPEndPoint)
         {
             int timeStart, timeEnd, responseSize, errCount = 0;
-            byte[] responseMessage = new byte[1024];
+            byte[] responseMessage;
         
             EndPoint hopEndPoint = destIPEndPoint;
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 3000);
@@ -49,6 +50,7 @@ namespace LR2_CSaN
                     socket.SendTo(packet.getBytes(), packet.PacketSize, SocketFlags.None, destIPEndPoint);
                     try
                     {
+                        responseMessage = new byte[MESSAGE_MAX_SIZE];
                         responseSize = socket.ReceiveFrom(responseMessage, ref hopEndPoint);
                         timeEnd = Environment.TickCount;
                         ICMPPacket response = new ICMPPacket(responseMessage, responseSize);

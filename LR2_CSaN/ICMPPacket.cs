@@ -6,11 +6,12 @@ namespace LR2_CSaN
     {
         const int IP_HEADER_SIZE = 20;
         const int ICMP_HEADER_SIZE = 4;
+        const int MESSAGE_MAX_SIZE = 1024;
 
         private byte code;
         private UInt16 checksum;
         private int messageSize;
-        private byte[] message = new byte[1024];
+        private byte[] message = new byte[MESSAGE_MAX_SIZE];
 
         public byte Type { get; set; }
 
